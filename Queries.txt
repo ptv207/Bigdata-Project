@@ -1,0 +1,15 @@
+Sample Hive Queries Executed :
+
+
+create table tripdata(medallion STRING,hack_license STRING,vendor_id STRING,rate_code DOUBLE,store_and_fwd_flag STRING,pickup_datetime STRING,dropoff_datetime STRING,passenger_count DOUBLE,trip_time_in_secs DOUBLE,trip_distance DOUBLE,pickup_longitude DOUBLE,pickup_latitude DOUBLE,dropoff_longitude DOUBLE,dropoff_latitude DOUBLE) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LOCATION 's3://bigdata11/hive-results/tripdata_table';
+LOAD DATA INPATH 's3://bigdata11/data/trip data/*' OVERWRITE INTO TABLE tripdata;
+create table faredata_date(medallion STRING,hack_license STRING,vendor_id STRING,pickup_datetime DATE,payment_type STRING,fare_amount DOUBLE,surcharge DOUBLE,mta_tax DOUBLE,tip_amount DOUBLE,tolls_amount DOUBLE,total_amount DOUBLE)ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LOCATION 's3://bigdata11/hive-results/new/faredata_date_table';
+LOAD DATA INPATH 's3://bigdata11/data/faredata/*' OVERWRITE INTO TABLE faredata_date;
+create table weather(EST STRING,MaxTemperatureF DOUBLE,MeanTemperatureF DOUBLE,MinTemperatureF DOUBLE,MaxDewPointF DOUBLE,MeanDewPointF DOUBLE,MinDewpointF DOUBLE,MaxHumidity DOUBLE, MeanHumidity DOUBLE, MinHumidity DOUBLE, MaxSeaLevelPressureIn DOUBLE, MeanSeaLevelPressureIn DOUBLE,  MinSeaLevelPressureIn DOUBLE, MaxVisibilityMiles DOUBLE, MeanVisibilityMiles DOUBLE, MinVisibilityMiles DOUBLE, MaxWindSpeedMPH DOUBLE, MeanWindSpeedMPH DOUBLE, MaxGustSpeedMPH DOUBLE,PrecipitationIn DOUBLE, CloudCover DOUBLE, Events STRING, WindDirDegrees DOUBLE) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LOCATION 's3://bigdata11/hive-results/weather_table';
+LOAD DATA INPATH 's3://bigdata11/data/weather/*' OVERWRITE INTO TABLE weather;
+SELECT SUM(tip_amount) as TIP_SUM,COUNT(*) as totaltrips FROM faredata WHERE payment_type not like '%CSH%' and fare_amount BETWEEN 31 and 40;
+select to_date(pickup_datetime) as DATE, COUNT(*) as number_of_rides from faredata GROUP BY to_date(pickup_datetime);
+select EST,COUNT(*) AS numberofrides from faredata,weather where EST=to_date(pickup_datetime) and Events not like '' GROUP BY EST;
+hive -e 'SELECT HOUR(pickup_datetime) AS hourly, COUNT(*) AS numberperhour FROM tripdata GROUP BY HOUR(pickup_datetime);' > query2.csv
+
+
